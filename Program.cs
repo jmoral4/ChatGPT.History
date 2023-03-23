@@ -1,7 +1,4 @@
-﻿using OpenAI_API;
-using OpenAI_API.Chat;
-using OpenAI_API.Models;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
@@ -31,7 +28,7 @@ namespace ChatGPTHistory
             string apiKey = await keyVaultManager.GetSecretAsync(secretName);
 
             Console.WriteLine("Retrieved API key: " + apiKey);
-            ChatGPTClient chatGPTClient = new ChatGPTClient(apiKey);
+            ChatGPTClient chatGPTClient = new ChatGPTClient(apiKey, ChatModels.GPT3Turbo, 500);
 
             var exitRequested = false;
 
@@ -47,7 +44,7 @@ namespace ChatGPTHistory
                 if (!string.IsNullOrEmpty(userprompt))
                 {
                     chatGPTClient.AppendUserInput(userprompt);
-
+                    
                     st.Start();
                     string response = await chatGPTClient.GetResponseFromChatbotAsync();
                     Console.ForegroundColor = ConsoleColor.Green;
@@ -58,9 +55,9 @@ namespace ChatGPTHistory
                     Console.ResetColor();
                     st.Reset();
 
-                    foreach (ChatMessage msg in chatGPTClient.GetMessageHistory())
+                    foreach (var msg in chatGPTClient.GetMessageHistory())
                     {
-                        messageHistory.Add($"{msg.Role}: {msg.Content}");
+                        messageHistory.Add($"{msg}");
                     }
                 }
                 else
