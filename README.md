@@ -6,4 +6,4 @@ A small console app to communicate with ChatGPT and log responses to file
 * Retrieve sessions and submit appropriate system prompts to prep sessions
 * Dialog to view available sessions
 
-![screenshot](scap.png)
+![screenshot](screenshot.png)
