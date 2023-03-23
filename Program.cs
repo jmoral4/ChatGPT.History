@@ -37,19 +37,14 @@ namespace ChatGPTHistory
 
             while (!exitRequested)
             {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.Write("Enter a System Prompt [optional]:");
-                Console.ResetColor();
-                var sysprompt = Console.ReadLine();
-                if (!String.IsNullOrEmpty(sysprompt))
+                var sysprompt = await ReadUserInputAsync("Enter a System Prompt [optional]:");
+                if (!string.IsNullOrEmpty(sysprompt))
                 {
                     chatGPTClient.AppendSystemMessage(sysprompt);
-                }                
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.Write("Enter your Prompt:");
-                Console.ResetColor();
-                var userprompt = Console.ReadLine();
-                if (!String.IsNullOrEmpty(userprompt))
+                }
+
+                var userprompt = await ReadUserInputAsync("Enter your Prompt:");
+                if (!string.IsNullOrEmpty(userprompt))
                 {
                     chatGPTClient.AppendUserInput(userprompt);
 
@@ -81,6 +76,7 @@ namespace ChatGPTHistory
                 }
             }
 
+
             Console.WriteLine("------------HISTORY ------------------");
             // the entire chat history is available in chat.Messages
             foreach (var  msg in messageHistory)
@@ -94,7 +90,16 @@ namespace ChatGPTHistory
 
             Console.WriteLine($"Rest easy chummer, All History was logged to: {flname}");
 
-        }      
-        
+        }
+
+        private static async Task<string> ReadUserInputAsync(string prompt, ConsoleColor color = ConsoleColor.Yellow)
+        {
+            Console.ForegroundColor = color;
+            Console.Write(prompt);
+            Console.ResetColor();
+            return await Task.Run(() => Console.ReadLine());
+        }
+
+
     }
 }
