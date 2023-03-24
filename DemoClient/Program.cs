@@ -24,16 +24,8 @@ namespace ChatGPT.ChatConsole
             conversation.SessionName = r.Next().ToString();
             Console.WriteLine("Loading ChatGPT Commandline Client. Type: quit! to exit.");
 
-            // Load configuration and retrieve API key
-            // OPTIONAL REMOVE BELOW HERE ----------------------------------------------------
-            ConfigurationManager configManager = new ConfigurationManager();
-            string vaultUri = configManager.GetVaultUri();
-            string secretName = configManager.GetSecretName();
-            var aad = configManager.GetADCredentials();
-            KeyVaultManager keyVaultManager = new KeyVaultManager(vaultUri,aad);
-            string apiKey = await keyVaultManager.GetSecretAsync(secretName);
-            // OPTIONAL UNCOMMENT BELOW ------------------------------------------------------
-            // string apiKey = "<your OpenAI Api Key>";
+            //retrieve API key            
+            string apiKey = File.ReadAllText("apikey.key");
 
             Console.WriteLine("Retrieved API key: " + apiKey);
             ChatGPTClient chatGPTClient = new ChatGPTClient(apiKey, ChatModels.GPT3Turbo, 500);
