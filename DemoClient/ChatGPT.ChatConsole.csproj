@@ -29,6 +29,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="apikey.key">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="appsettings.json">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>appSettings.Designer.cs</LastGenOutput>
