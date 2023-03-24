@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ChatGPTHistory
+namespace ChatGPT.ChatConsole
 {
     public class ConfigurationManager
     {
@@ -27,6 +27,24 @@ namespace ChatGPTHistory
         {
             return _configuration["KeyVaultSettings:SecretName"];
         }
+
+        public AADCredentials GetADCredentials()
+        {
+            return new AADCredentials()
+            {
+                TenantId = _configuration["AAD:TenantId"],
+                ClientId = _configuration["AAD:ClientId"],
+                ClientSecret = _configuration["AAD:ClientSecret"]
+            };
+        }
+        
+    }
+
+    public class AADCredentials
+    { 
+        public string TenantId { get; set; }
+        public string ClientId { get; set; }
+        public string ClientSecret { get; set; }
     }
 
 }

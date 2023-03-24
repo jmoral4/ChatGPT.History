@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
 
-namespace ChatGPTHistory
+namespace ChatGPT.History
 {
     /// <summary>
     /// Small class to estimate token counts. Will be used in the future when uploading summaries to retain session history.

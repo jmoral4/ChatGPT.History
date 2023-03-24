@@ -6,26 +6,34 @@ using Azure;
 using System.Globalization;
 using System.Diagnostics;
 using Microsoft.Extensions.Configuration;
+using Azure.Core.Diagnostics;
+using ChatGPT.History;
+using Microsoft.Extensions.Azure;
 
-namespace ChatGPTHistory
+namespace ChatGPT.ChatConsole
 {
     internal class Program
     {
        
         static async Task Main(string[] args)
         {
-
+            //OPTIONAL turn on AZ logging: using AzureEventSourceListener listener = AzureEventSourceListener.CreateConsoleLogger();
             Stopwatch st = new Stopwatch();
-            List<string> messageHistory = new List<string>();
+            Conversation conversation = new Conversation();
+            Random r = new Random();
+            conversation.SessionName = r.Next().ToString();
             Console.WriteLine("Loading ChatGPT Commandline Client. Type: quit! to exit.");
 
             // Load configuration and retrieve API key
+            // OPTIONAL REMOVE BELOW HERE ----------------------------------------------------
             ConfigurationManager configManager = new ConfigurationManager();
             string vaultUri = configManager.GetVaultUri();
             string secretName = configManager.GetSecretName();
-
-            KeyVaultManager keyVaultManager = new KeyVaultManager(vaultUri);
+            var aad = configManager.GetADCredentials();
+            KeyVaultManager keyVaultManager = new KeyVaultManager(vaultUri,aad);
             string apiKey = await keyVaultManager.GetSecretAsync(secretName);
+            // OPTIONAL UNCOMMENT BELOW ------------------------------------------------------
+            // string apiKey = "<your OpenAI Api Key>";
 
             Console.WriteLine("Retrieved API key: " + apiKey);
             ChatGPTClient chatGPTClient = new ChatGPTClient(apiKey, ChatModels.GPT3Turbo, 500);
@@ -37,12 +45,22 @@ namespace ChatGPTHistory
                 var sysprompt = await ReadUserInputAsync("Enter a System Prompt [optional]:");
                 if (!string.IsNullOrEmpty(sysprompt))
                 {
+                    if (string.Equals(sysprompt, "quit!", StringComparison.InvariantCultureIgnoreCase) )
+                    {
+                        exitRequested = true;
+                        break;
+                    }
                     chatGPTClient.AppendSystemMessage(sysprompt);
                 }
 
                 var userprompt = await ReadUserInputAsync("Enter your Prompt:");
                 if (!string.IsNullOrEmpty(userprompt))
                 {
+                    if (string.Equals(userprompt, "quit!", StringComparison.InvariantCultureIgnoreCase) || userprompt.StartsWith("quit"))
+                    {
+                        exitRequested = true;
+                        break;
+                    }
                     chatGPTClient.AppendUserInput(userprompt);
                     
                     st.Start();
@@ -57,7 +75,7 @@ namespace ChatGPTHistory
 
                     foreach (var msg in chatGPTClient.GetMessageHistory())
                     {
-                        messageHistory.Add($"{msg}");
+                        conversation.Messages.Add(msg);                        
                     }
                 }
                 else
@@ -76,16 +94,22 @@ namespace ChatGPTHistory
 
             Console.WriteLine("------------HISTORY ------------------");
             // the entire chat history is available in chat.Messages
-            foreach (var  msg in messageHistory)
+            foreach (var  msg in conversation.Messages)
             {
-                Console.WriteLine($"{msg}");
+                Console.WriteLine($"{msg.Role}:{msg.Message}");
             }
 
-            var flname = $"ChatGptHistory{DateTime.Now.ToString("yyyyMMdd.HHmmss")}.md";
-            // Write messageHistory to file
-            File.WriteAllLines(flname, messageHistory);
+            HistoryDbConfig dbConfig = new HistoryDbConfig() { DatabaseFilename = "ChatGPT.db", DbFolderPrefix = "History" };
+            HistoryManager hm = new HistoryManager(dbConfig);
 
-            Console.WriteLine($"Rest easy chummer, All History was logged to: {flname}");
+            var items = await hm.AddOrUpdateConversation(conversation);
+            Console.WriteLine($"Saved {items} to Sqlite db.");
+            
+            // also save to text for redundancy/sanity while debugging
+            string historyFilename = $"ChatGPT_Convo_{DateTime.Now.ToString("yyyyMMdd_HHmmss")}.md";
+            File.WriteAllText(historyFilename, conversation.ToString());
+
+            Console.WriteLine($"Rest easy chummer, All History was logged to: {dbConfig.DatabaseFilename}");
 
         }
 

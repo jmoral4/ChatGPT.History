@@ -8,8 +8,9 @@ using OpenAI.GPT3;
 using OpenAI.GPT3.Interfaces;
 using OpenAI.GPT3.ObjectModels.RequestModels;
 using OpenAI.GPT3.ObjectModels;
+using ChatGPT.History;
 
-namespace ChatGPTHistory
+namespace ChatGPT.ChatConsole
 {
 
     public enum ChatModels { GPT4, GPT3Turbo }
@@ -18,7 +19,7 @@ namespace ChatGPTHistory
     {
         private readonly OpenAIService _api;
         private readonly List<ChatMessage> _conversation;
-        private readonly List<string> _history;
+        private readonly List<ConversationMessage> _history;
         private readonly int MaxTokens;
         ChatModels _model;
 
@@ -31,24 +32,27 @@ namespace ChatGPTHistory
             _model = model;
             MaxTokens= maxTokens;
             _conversation = new List<ChatMessage>();
-            _history= new List<string>();
+            _history= new List<ConversationMessage>();
         }
 
 
 
         public void AppendAssistantMessage(string message)
         {
-            _conversation.Add(ChatMessage.FromAssistant(message));            
+            _conversation.Add(ChatMessage.FromAssistant(message));
+            _history.Add(new ConversationMessage() { Role = "assistant", Message = message, DateCreated = DateTime.Now });
         }
 
         public void AppendSystemMessage(string message)
         {
-            _conversation.Add(ChatMessage.FromSystem(message));            
+            _conversation.Add(ChatMessage.FromSystem(message));
+            _history.Add(new ConversationMessage() { Role = "system", Message = message, DateCreated = DateTime.Now });
         }
 
         public void AppendUserInput(string message)
         {
             _conversation.Add(ChatMessage.FromUser(message));
+            _history.Add(new ConversationMessage() { Role = "user", Message = message, DateCreated = DateTime.Now });
         }
 
         public async Task<string> GetResponseFromChatbotAsync()
@@ -64,7 +68,7 @@ namespace ChatGPTHistory
             {
                 foreach (var opt in completionResult.Choices)
                 {
-                    _history.Add($"{opt.Message.Role}:{opt.Message.Content}");
+                    _history.Add(new ConversationMessage() { Role = opt.Message.Role, Message = opt.Message.Content, DateCreated = DateTime.Now });                    
                 }
 
                 return completionResult.Choices.First().Message.Content;
@@ -75,7 +79,7 @@ namespace ChatGPTHistory
             }
         }
 
-        public IReadOnlyList<string> GetMessageHistory()
+        public IReadOnlyList<ConversationMessage> GetMessageHistory()
         {
             return _history;
         }

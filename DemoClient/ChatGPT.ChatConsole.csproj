@@ -17,6 +17,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ChatGPT.History\ChatGPT.History.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="appSettings.Designer.cs">
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <AutoGen>True</AutoGen>

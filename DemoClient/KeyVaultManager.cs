@@ -6,16 +6,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Azure.Core;
 
-namespace ChatGPTHistory
+namespace ChatGPT.ChatConsole
 {
     public class KeyVaultManager
     {
         private readonly SecretClient _client;
 
-        public KeyVaultManager(string vaultUri)
+        public KeyVaultManager(string vaultUri, AADCredentials aad)
         {
-            _client = new SecretClient(new Uri(vaultUri), new DefaultAzureCredential());
+            _client = new SecretClient(new Uri(vaultUri), new ClientSecretCredential(aad.TenantId, aad.ClientId, aad.ClientSecret));
         }
 
         public async Task<string> GetSecretAsync(string secretName)
