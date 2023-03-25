@@ -1,5 +1,5 @@
 # ChatGPTHistory
-A small console app to communicate with ChatGPT and log responses to file
+A small C# library to record ChatGPT conversations in a local Sqlitedb. Also included is a small console app to communicate with ChatGPT and facilitate using the library.
 
 ## Upcoming
 * Store sessions locally in a SQLite db 
