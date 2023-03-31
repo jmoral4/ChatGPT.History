@@ -2,9 +2,10 @@
 A small C# library to record ChatGPT conversations in a local Sqlitedb. Also included is a small console app to communicate with ChatGPT and facilitate using the library.
 
 ## Upcoming
-* Store sessions locally in a SQLite db 
-* Retrieve sessions and submit appropriate system prompts to prep sessions
-* Dialog to view available sessions
+* add vector database
+* process embeddings [optional] for unlimited history
+* retrieve sessions and submit appropriate system prompts to prep sessions
+* dialog to view available sessions
 
 ![screenshot](screenshot.png)
 
